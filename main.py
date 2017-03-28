@@ -1,5 +1,6 @@
 import sys
 import os
+import verifier
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.scatter import Scatter
@@ -48,8 +49,10 @@ class TutorialApp(App):
 	def verify(self, event):
 		if is_android:			
 			vibrator.vibrate(0.1)
-		word = 'o:' + self.txtInput.text
-		self.lblResult.text += '\n' + word[0:20]
+		options = verifier.parseAndVerify(self.txtInput.text)
+		self.lblResult.text = ''		
+		for option in options:			
+			self.lblResult.text += option['texts'][0]['text'] + '\n'
 
 if __name__ == '__main__':
 	qrcode = '' #sys.platform + ' - ' + os.name
