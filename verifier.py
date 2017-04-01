@@ -35,6 +35,7 @@ def mapGq2Zq(element):
 	return enc_modulus - element - 1
 	
 def urlopen(url):
+	print('urlopen: ' + url)
 	if is_android:
 		return urllib.urlopen(url)
 	if is_linux:
@@ -65,10 +66,18 @@ def getOptions(board):
 	options = json.loads(optionsJson)	
 	return options
 	
+def getPartialEncryptionKeys(board):	
+	partialEncryptionKeysJson = urlopen(board + '/partialEncryptionKeys')
+	partialEncryptionKeys = json.load(partialEncryptionKeysJson)
+	return partialEncryptionKeys['messages'] # verify signature
+	
 def getEncryptionKey(board):
-	encryptionKeyJson = urlopen(board + '/encryptionKey')
-	encryptionKey = json.load(encryptionKeyJson)
-	return int(encryptionKey['message']['value'])
+	partialEncryptionKeys = getPartialEncryptionKeys(board)
+	result = 1
+	for partialKey in partialEncryptionKeys:
+		result = (result * int(partialKey['partialKey'])) % enc_modulus
+	print("use encryptionKey: {}".format(result))
+	return result
     
 def verify(sid, eid, x, r):
 	board = sid + '/board/' + eid
